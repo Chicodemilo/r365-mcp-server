@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+// Load .env relative to this script (project root, one level up from dist/),
+// not the current working directory — Claude Desktop launches the server
+// from "/", so a cwd-based lookup would never find the .env file.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: join(__dirname, "..", ".env"), quiet: true });
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod/v3";
