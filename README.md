@@ -97,6 +97,31 @@ Close and reopen Claude Desktop. You should see the R365 tools available in the 
 | `get_vendors` | Vendor/company records |
 | `query_r365` | Custom OData query (advanced — any view, any filter) |
 
+## Slash Commands (Prompts)
+
+These show up as `/commands` in Claude Desktop. Each one calls the right R365 endpoints, analyzes the data, and presents a formatted report. Every command accepts an optional `extra_instructions` field so you can customize the output.
+
+| Command | What it does | R365 Endpoints Used |
+|---------|-------------|---------------------|
+| `/daily-snapshot` | Morning check-in: sales, labor, and red flags for a single day | `get_sales`, `get_labor`, `get_transactions` |
+| `/weekly-sales` | Weekly revenue report with top items and day-over-day trends | `get_sales`, `get_sales_detail` |
+| `/labor-report` | Labor cost analysis: hours, labor-to-sales ratio, overtime flags | `get_labor`, `get_employees`, `get_sales` |
+| `/pl-summary` | Profit & Loss statement: revenue, COGS, labor, expenses, net income | `get_transactions`, `get_transaction_detail`, `get_gl_accounts` |
+| `/product-mix` | Menu performance: top/bottom sellers, category breakdown | `get_sales_detail`, `get_items` |
+| `/food-cost` | Food cost analysis: vendor spend, COGS %, cost anomalies | `get_transactions`, `get_items`, `get_vendors`, `get_sales` |
+| `/payment-breakdown` | How guests are paying: cash vs card vs delivery, trends | `get_sales_payments`, `get_sales` |
+| `/team-roster` | Team overview: headcount by location, roles, tenure | `get_employees`, `get_job_titles`, `get_locations` |
+
+### Customizing Commands
+
+Every command accepts optional parameters. For example:
+
+- `/daily-snapshot` with `date: 2025-05-20` and `location: Downtown`
+- `/weekly-sales` with `extra_instructions: Compare this week to the prior week`
+- `/pl-summary` with `extra_instructions: Focus on food costs, I think they're too high`
+
+You can also just ask Claude in plain English — the slash commands are shortcuts, not requirements.
+
 ## Limitations
 
 - **Sales data** (sales, sales detail, sales payments) is limited to **31-day date ranges** per request — this is an R365 API limitation.

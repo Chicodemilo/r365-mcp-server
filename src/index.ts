@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod/v3";
 import { R365Client, type ODataView, type ODataQueryParams } from "./r365-client.js";
+import { registerPrompts } from "./prompts.js";
 
 // ---------------------------------------------------------------------------
 // Configuration — read from environment variables
@@ -421,6 +422,11 @@ server.tool(
     });
   }
 );
+
+// ---------------------------------------------------------------------------
+// MCP Prompts (slash commands in Claude Desktop)
+// ---------------------------------------------------------------------------
+registerPrompts(server);
 
 // ---------------------------------------------------------------------------
 // Start the server
