@@ -16,6 +16,7 @@ import { z } from "zod/v3";
 import { R365Client, type ODataView, type ODataQueryParams } from "./r365-client.js";
 import { registerPrompts } from "./prompts.js";
 import { registerResources } from "./resources.js";
+import { registerNoteTools } from "./notes.js";
 
 // ---------------------------------------------------------------------------
 // Configuration — read from environment variables
@@ -433,6 +434,7 @@ server.tool(
 // ---------------------------------------------------------------------------
 registerPrompts(server);
 registerResources(server);
+registerNoteTools(server);
 
 // ---------------------------------------------------------------------------
 // Start the server
