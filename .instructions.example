@@ -1,0 +1,24 @@
+# Business Context
+
+This file is read by the R365 MCP server and provided to Claude as context.
+Copy this to .instructions.md and fill in your details.
+The .instructions.md file is gitignored — your info stays local.
+
+## About the business
+
+- Business name:
+- Type (fast casual, full service, QSR, etc.):
+- Number of locations:
+- Location names:
+
+## What matters most
+
+- Key metrics you track (e.g., food cost %, labor %, daily sales targets):
+- Any known issues or things to watch for:
+- Typical busy days/seasons:
+
+## Preferences
+
+- How you like reports formatted (brief vs detailed):
+- Locations you want compared or highlighted:
+- Any other context that helps Claude give better answers:

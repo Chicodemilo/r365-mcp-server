@@ -15,6 +15,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod/v3";
 import { R365Client, type ODataView, type ODataQueryParams } from "./r365-client.js";
 import { registerPrompts } from "./prompts.js";
+import { registerResources } from "./resources.js";
 
 // ---------------------------------------------------------------------------
 // Configuration — read from environment variables
@@ -88,9 +89,8 @@ const server = new McpServer({
 // ---- Tool: Get Sales Data ----
 server.tool(
   "get_sales",
-  "Get sales ticket data from R365 (headers with server, amounts, guest count). " +
-    "Useful for revenue analysis, average ticket size, guest counts. " +
-    "Note: max 31-day date range per request.",
+  "Sales tickets: revenue, guest count, avg ticket, server name, by location. " +
+    "Returns: date, locationName, serverName, amount, guestCount. Max 31-day range.",
   {
     start_date: z
       .string()
@@ -121,9 +121,8 @@ server.tool(
 // ---- Tool: Get Sales Detail ----
 server.tool(
   "get_sales_detail",
-  "Get line-item sales detail (menu items, quantities, amounts). " +
-    "Useful for product mix analysis, item-level revenue. " +
-    "Note: max 31-day date range per request.",
+  "Line-item sales: each menu item sold with quantity and amount. " +
+    "Use for product mix and menu analysis. Max 31-day range.",
   {
     start_date: z.string().describe("Start date (YYYY-MM-DD)."),
     end_date: z.string().describe("End date (YYYY-MM-DD)."),
@@ -145,8 +144,7 @@ server.tool(
 // ---- Tool: Get Sales Payments ----
 server.tool(
   "get_sales_payments",
-  "Get payment method breakdown for sales tickets (cash, card, etc.). " +
-    "Note: max 31-day date range per request.",
+  "Payment methods per ticket: cash, card, gift card, etc. with amounts. Max 31-day range.",
   {
     start_date: z.string().describe("Start date (YYYY-MM-DD)."),
     end_date: z.string().describe("End date (YYYY-MM-DD)."),
@@ -168,8 +166,8 @@ server.tool(
 // ---- Tool: Get Transactions (P&L, Journal Entries, etc.) ----
 server.tool(
   "get_transactions",
-  "Get financial transactions from R365 (P&L entries, journal entries, invoices, etc.). " +
-    "Useful for generating P&L reports, tracking expenses, and financial analysis.",
+  "Financial transactions: P&L entries, invoices, journal entries. " +
+    "Returns: date, type, amount, locationName, approvalStatus. Use for P&L and expense reports.",
   {
     start_date: z.string().describe("Start date (YYYY-MM-DD)."),
     end_date: z.string().describe("End date (YYYY-MM-DD)."),
@@ -196,8 +194,8 @@ server.tool(
 // ---- Tool: Get Transaction Detail ----
 server.tool(
   "get_transaction_detail",
-  "Get line-item details for a specific transaction (debits, credits, GL account, amounts). " +
-    "Use after get_transactions to drill into a specific entry.",
+  "Line items for one transaction: GL account, debit, credit, amount. " +
+    "Call after get_transactions to drill into a specific entry by its UUID.",
   {
     transaction_id: z
       .string()
@@ -213,8 +211,8 @@ server.tool(
 // ---- Tool: Get GL Accounts (Chart of Accounts) ----
 server.tool(
   "get_gl_accounts",
-  "Get the chart of accounts (GL accounts) from R365. " +
-    "Useful for understanding account categories, mapping expenses, and financial reporting.",
+  "Chart of accounts: GL account name, number, type, category. " +
+    "Call this first before interpreting transactions so you understand the account structure.",
   {
     search: z
       .string()
@@ -237,7 +235,7 @@ server.tool(
 // ---- Tool: Get Locations ----
 server.tool(
   "get_locations",
-  "Get all restaurant locations from R365. Returns location names, IDs, and legal entities.",
+  "All restaurant locations: name, number, legal entity. Call this first if you need to know what locations exist.",
   {
     search: z
       .string()
@@ -256,8 +254,8 @@ server.tool(
 // ---- Tool: Get Labor Data ----
 server.tool(
   "get_labor",
-  "Get labor/punch clock data from R365 (shift times, hours worked, payroll status). " +
-    "Useful for labor cost analysis, overtime tracking, and scheduling insights.",
+  "Punch clock data: employee, shift start/end, hours worked, payroll status. " +
+    "Queried per day. Pair with get_sales to calculate labor-to-sales ratio.",
   {
     date: z
       .string()
@@ -283,7 +281,7 @@ server.tool(
 // ---- Tool: Get Employees ----
 server.tool(
   "get_employees",
-  "Get employee records from R365 (names, hire dates, locations, contact info).",
+  "Employee records: name, hire date, location, contact info. Filter by name or location.",
   {
     search: z
       .string()
@@ -311,7 +309,7 @@ server.tool(
 // ---- Tool: Get Job Titles ----
 server.tool(
   "get_job_titles",
-  "Get job title classifications from R365 (titles, pay rates, GL account mappings).",
+  "Job titles: role name, pay rate, GL account mapping.",
   {
     search: z
       .string()
@@ -330,8 +328,7 @@ server.tool(
 // ---- Tool: Get Inventory Items ----
 server.tool(
   "get_items",
-  "Get inventory items from R365 (with 3-level categorization). " +
-    "Useful for food cost analysis and inventory management.",
+  "Inventory items: name and 3-level category. Use for food cost and menu item mapping.",
   {
     search: z
       .string()
@@ -354,7 +351,7 @@ server.tool(
 // ---- Tool: Get Vendors/Companies ----
 server.tool(
   "get_vendors",
-  "Get vendor/company records from R365. Useful for AP analysis and vendor management.",
+  "Vendor/company records: name, ID, audit fields. Use for AP spend analysis.",
   {
     search: z
       .string()
@@ -377,10 +374,9 @@ server.tool(
 // ---- Tool: Run Custom OData Query ----
 server.tool(
   "query_r365",
-  "Run a custom OData query against any R365 view. Use this for advanced queries " +
-    "that the other tools don't cover. Available views: Transaction, TransactionDetail, " +
-    "Company, Item, Location, GlAccount, Employee, JobTitle, LaborDetail, POSEmployee, " +
-    "SalesEmployee, SalesDetail, SalesPayment, EntityDeleted.",
+  "Custom OData query against any R365 view. Use when other tools don't cover your need. " +
+    "Views: Transaction, TransactionDetail, Company, Item, Location, GlAccount, " +
+    "Employee, JobTitle, LaborDetail, POSEmployee, SalesEmployee, SalesDetail, SalesPayment, EntityDeleted.",
   {
     view: z
       .enum([
@@ -433,9 +429,10 @@ server.tool(
 );
 
 // ---------------------------------------------------------------------------
-// MCP Prompts (slash commands in Claude Desktop)
+// MCP Prompts (slash commands) and Resources (reference docs)
 // ---------------------------------------------------------------------------
 registerPrompts(server);
+registerResources(server);
 
 // ---------------------------------------------------------------------------
 // Start the server
