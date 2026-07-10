@@ -1,6 +1,7 @@
 # R365 MCP Server
+Built for a friend who owns a restaurant group. They wanted to ask Claude questions about their business instead of digging through R365 dashboards.
 
-Connect Claude to your Restaurant365 account. Ask Claude about your sales, labor, P&L, inventory, and more — just like you'd use Notion or Google Drive integrations.
+This connects Claude to a Restaurant365 account. Ask Claude about  sales, labor, P&L, inventory, and more — just like you'd use Notion or Google Drive integrations.
 
 ## Quick Start (Mac)
 
